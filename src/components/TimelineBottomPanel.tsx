@@ -26,9 +26,14 @@ const EVENT_PRESETS = [
 export default function TimelineBottomPanel() {
   const sliderRef = useRef<HTMLInputElement | null>(null);
   const anchorHourEpochMs = useResonanceStore((s) => s.anchorHourEpochMs);
+  const provenance = useResonanceStore((s) => s.provenance);
   const dataset = useMemo(
-    () => getSchumannDataset(anchorHourEpochMs),
-    [anchorHourEpochMs]
+    () =>
+      getSchumannDataset(
+        anchorHourEpochMs,
+        provenance.liveOverridesByHourEpoch
+      ),
+    [anchorHourEpochMs, provenance.liveOverridesByHourEpoch]
   );
 
   const timeIndex = useResonanceStore((s) => s.timeIndex);
@@ -137,8 +142,8 @@ export default function TimelineBottomPanel() {
           </div>
         </div>
 
-        {/* Center: Active Timestamp & Offset */}
-        <div className="flex items-center gap-3 rounded-xl border border-slate-800/90 bg-slate-950/90 px-3.5 py-1.5 font-mono">
+        {/* Center: Active Timestamp, Offset & Data Provenance Transparency Badge */}
+        <div className="flex items-center gap-2.5 rounded-xl border border-slate-800/90 bg-slate-950/90 px-3.5 py-1.5 font-mono">
           <Clock className="h-3.5 w-3.5 text-cyan-400" />
           <label
             htmlFor="temporal-scrubber"
@@ -153,7 +158,11 @@ export default function TimelineBottomPanel() {
                 : "bg-slate-800 text-cyan-300"
             }`}
           >
-            {hoursAgo === 0 ? "LIVE STREAM" : `T-${hoursAgo}H`}
+            {hoursAgo === 0
+              ? provenance.mode === "HYBRID_NOAA_LIVE"
+                ? "NOW · NOAA + MODEL"
+                : "NOW · SYNTHETIC MODEL"
+              : `T-${hoursAgo}H`}
           </span>
         </div>
 

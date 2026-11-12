@@ -1,9 +1,14 @@
 import { create } from "zustand";
 import {
   DEFAULT_SSR_EPOCH_MS,
+  PolarizationMode,
   TOTAL_TIME_STEPS,
   STATIONS,
 } from "@/lib/schumann-data";
+import {
+  defaultTelemetryAdapter,
+  TelemetryProvenance,
+} from "@/lib/telemetry-adapter";
 
 export type MetricMode =
   | "amplitude"
@@ -31,41 +36,64 @@ export interface CameraTarget {
 
 interface ResonanceStoreState {
   anchorHourEpochMs: number;
+  provenance: TelemetryProvenance;
   timeIndex: number;
   isPlaying: boolean;
   playbackSpeed: 1 | 2 | 4;
   selectedStationId: string | null;
+  inspectingQBurst: boolean;
+  isLeftSidebarOpen: boolean;
   isRightSidebarOpen: boolean;
   activeMetric: MetricMode;
   selectedHarmonic: HarmonicMode;
+  polarizationMode: PolarizationMode;
   layers: GlobeLayerState;
   cameraTarget: CameraTarget | null;
 
   // Actions
   syncLiveClock: () => void;
+  refreshLiveSpaceWeather: () => Promise<void>;
   setTimeIndex: (index: number | ((prev: number) => number)) => void;
   stepTime: (delta: number) => void;
   togglePlay: () => void;
   setIsPlaying: (playing: boolean) => void;
   setPlaybackSpeed: (speed: 1 | 2 | 4) => void;
   selectStation: (locationId: string | null, flyTo?: boolean) => void;
+  selectQBurstEpicenter: (
+    lat: number,
+    lng: number,
+    flyTo?: boolean
+  ) => void;
+  setInspectingQBurst: (inspecting: boolean) => void;
+  setLeftSidebarOpen: (open: boolean) => void;
   setRightSidebarOpen: (open: boolean) => void;
   setActiveMetric: (metric: MetricMode) => void;
   setSelectedHarmonic: (mode: HarmonicMode) => void;
+  setPolarizationMode: (mode: PolarizationMode) => void;
   toggleLayer: (layer: keyof GlobeLayerState) => void;
   resetGlobeView: () => void;
 }
 
 export const useResonanceStore = create<ResonanceStoreState>((set) => ({
   anchorHourEpochMs: DEFAULT_SSR_EPOCH_MS,
-  // Start at step 55 (during an active geomagnetic Q-burst surge so the globe immediately pops with telemetry)
+  provenance: {
+    mode: "SYNTHETIC_SIMULATION",
+    lastSyncedUtc: null,
+    kpSource: "Synthetic Diurnal + Solar-Storm Kp Model",
+    solarWindSource: "Synthetic L1 Magnetopause Velocity Model",
+    elfSpectraSource: "Coupled Spherical Waveguide Eigenmode Solver (f₁–f₅)",
+    liveOverridesByHourEpoch: {},
+  },
   timeIndex: 55,
   isPlaying: false,
   playbackSpeed: 1,
   selectedStationId: "TOMSK-RU",
+  inspectingQBurst: false,
+  isLeftSidebarOpen: true,
   isRightSidebarOpen: true,
   activeMetric: "amplitude",
   selectedHarmonic: 1,
+  polarizationMode: "TOTAL",
   layers: {
     showStationNodes: true,
     showIonosphericHeatmap: true,
@@ -83,6 +111,11 @@ export const useResonanceStore = create<ResonanceStoreState>((set) => ({
         ? state
         : { anchorHourEpochMs: liveHourMs }
     );
+  },
+
+  refreshLiveSpaceWeather: async () => {
+    const prov = await defaultTelemetryAdapter.fetchLatestSpaceWeather();
+    set({ provenance: prov });
   },
 
   setTimeIndex: (indexOrUpdater) =>
@@ -108,7 +141,7 @@ export const useResonanceStore = create<ResonanceStoreState>((set) => ({
   selectStation: (locationId, flyTo = true) =>
     set((state) => {
       if (!locationId) {
-        return { selectedStationId: null };
+        return { selectedStationId: null, inspectingQBurst: false };
       }
       const station = STATIONS.find((s) => s.location_id === locationId);
       const nextCamera =
@@ -123,14 +156,32 @@ export const useResonanceStore = create<ResonanceStoreState>((set) => ({
 
       return {
         selectedStationId: locationId,
+        inspectingQBurst: false,
         isRightSidebarOpen: true,
         cameraTarget: nextCamera,
       };
     }),
 
+  selectQBurstEpicenter: (lat, lng, flyTo = true) =>
+    set((state) => ({
+      inspectingQBurst: true,
+      isRightSidebarOpen: true,
+      cameraTarget: flyTo
+        ? {
+            lat,
+            lng,
+            altitude: 1.65,
+            ts: Date.now(),
+          }
+        : state.cameraTarget,
+    })),
+
+  setInspectingQBurst: (inspecting) => set({ inspectingQBurst: inspecting }),
+  setLeftSidebarOpen: (open) => set({ isLeftSidebarOpen: open }),
   setRightSidebarOpen: (open) => set({ isRightSidebarOpen: open }),
   setActiveMetric: (metric) => set({ activeMetric: metric }),
   setSelectedHarmonic: (mode) => set({ selectedHarmonic: mode }),
+  setPolarizationMode: (mode) => set({ polarizationMode: mode }),
 
   toggleLayer: (layer) =>
     set((state) => ({
@@ -142,6 +193,7 @@ export const useResonanceStore = create<ResonanceStoreState>((set) => ({
 
   resetGlobeView: () =>
     set({
+      inspectingQBurst: false,
       cameraTarget: {
         lat: 20,
         lng: 15,
@@ -150,4 +202,3 @@ export const useResonanceStore = create<ResonanceStoreState>((set) => ({
       },
     }),
 }));
-
