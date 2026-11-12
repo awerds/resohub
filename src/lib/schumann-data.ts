@@ -435,25 +435,44 @@ export function getSchumannDataset(
     const americaChimney = Math.exp(-Math.pow((utcHour - 20) / 3.5, 2)) * 1.1;
     const diurnalExcitation = asiaChimney + africaChimney + americaChimney;
 
-    // Scenario presets at t=12 (Quiet), t=24 (Solar Q-Surge alpha), t=38 (Equatorial Peak), t=55 (Super-Bolt Storm beta)
+    // Scenario presets at t=12 (Baseline Quiet), t=24 (Solar Q-Surge alpha), t=38 (Equatorial Peak), t=55 (Super-Bolt Storm beta)
+    const isQuietPresetWindow = Math.abs(t - 12) <= 2;
+    const isScenarioPreset =
+      t === 12 || t === 24 || t === 38 || t === 55;
     const windowSurge1 = Math.exp(-Math.pow((t - 24) / 3.0, 2));
     const windowSurge2 = Math.exp(-Math.pow((t - 55) / 2.6, 2));
-    const quietWindow = Math.exp(-Math.pow((t - 12) / 3.0, 2));
+    const quietWindow = Math.exp(-Math.pow((t - 12) / 3.2, 2));
     const cyclicSurge =
       Math.max(
         0,
         Math.sin(epochHourIndex * 0.21) * Math.cos(epochHourIndex * 0.07)
       ) * 0.65;
 
-    let solarSurge = Math.max(
-      windowSurge1 * 0.88,
-      windowSurge2 * 1.25,
-      cyclicSurge * (1 - quietWindow * 0.8)
-    );
+    let solarSurge = isQuietPresetWindow
+      ? 0
+      : Math.max(
+          windowSurge1 * 0.88,
+          windowSurge2 * 1.25,
+          cyclicSurge * (1 - quietWindow * 0.95)
+        );
 
-    const liveOverride = liveOverrides[epochHourIndex];
+    // Apply live NOAA SWPC overrides to non-preset hours (preserving canonical scenario benchmarks)
+    const liveOverride = !isScenarioPreset && !isQuietPresetWindow
+      ? liveOverrides[epochHourIndex]
+      : undefined;
+
     const kpIndex =
-      liveOverride?.kpIndex !== undefined
+      t === 12
+        ? 1.2
+        : t === 24
+        ? 5.0
+        : t === 38
+        ? 2.4
+        : t === 55
+        ? 8.7
+        : isQuietPresetWindow
+        ? Number((1.2 + seededNoise(epochHourIndex * 31) * 0.4).toFixed(1))
+        : liveOverride?.kpIndex !== undefined
         ? liveOverride.kpIndex
         : Number(
             Math.min(
@@ -461,7 +480,7 @@ export function getSchumannDataset(
               Math.max(
                 1.1,
                 1.4 -
-                  quietWindow * 0.4 +
+                  quietWindow * 0.5 +
                   diurnalExcitation * 0.85 +
                   solarSurge * 5.4 +
                   seededNoise(epochHourIndex * 31) * 0.45
@@ -470,12 +489,14 @@ export function getSchumannDataset(
           );
 
     // If live Kp override came in from NOAA SWPC, couple solarSurge to Kp
-    if (liveOverride?.kpIndex !== undefined && t > TOTAL_TIME_STEPS - 8) {
+    if (liveOverride?.kpIndex !== undefined) {
       solarSurge = Math.max(solarSurge, Math.max(0, (kpIndex - 2.0) / 6.0));
     }
 
     const solarWindKms =
-      liveOverride?.solarWindKms !== undefined
+      t === 12
+        ? 342
+        : liveOverride?.solarWindKms !== undefined
         ? liveOverride.solarWindKms
         : Math.round(
             375 + solarSurge * 310 + seededNoise(epochHourIndex * 19) * 35
@@ -534,9 +555,9 @@ export function getSchumannDataset(
       );
 
       // Coupled Ionospheric D-Region Altitude Physics:
-      // Quiet reference altitude ~78-83 km at night, ~70-74 km by day.
+      // Quiet reference altitude ~77-83 km (mean ~80 km).
       // High Kp and solar X-ray / particle precipitation compress the lower D-region boundary
-      // downward toward 55-60 km, especially at high auroral latitudes (|lat| > 50 deg).
+      // downward toward 55-61 km, especially at high auroral latitudes (|lat| > 50 deg).
       const absLat = Math.abs(st.latitude);
       const auroralCouplingFactor = absLat >= 52 ? 1.42 : absLat >= 40 ? 1.12 : 0.88;
       const localSolarHour = (utcHour + st.longitude / 15 + 24) % 24;
@@ -544,17 +565,20 @@ export function getSchumannDataset(
         0,
         Math.sin(((localSolarHour - 6) / 12) * Math.PI)
       );
-      const quietDRegionKm = 81.5 - daytimeIonization * 6.2;
-      const stormCompressionKm = Number(
-        (
-          ((kpIndex - 1.2) * 1.95 + solarSurge * 4.8) *
-          auroralCouplingFactor
-        ).toFixed(1)
-      );
+      const quietDRegionKm = 82.2 - daytimeIonization * 3.8;
+      const stormCompressionKm = isQuietPresetWindow
+        ? 0.0
+        : Number(
+            Math.max(
+              0,
+              ((kpIndex - 1.2) * 1.95 + solarSurge * 4.8) *
+                auroralCouplingFactor
+            ).toFixed(1)
+          );
       const ionospheric_cavity_height_km = Number(
         Math.max(
           54.5,
-          Math.min(84.0, quietDRegionKm - stormCompressionKm + n1 * 0.9)
+          Math.min(84.5, quietDRegionKm - stormCompressionKm + n1 * 0.8)
         ).toFixed(1)
       );
 
@@ -572,11 +596,12 @@ export function getSchumannDataset(
         ).toFixed(3)
       );
 
-      // Q-burst transient calculation
-      const qBurstRaw =
-        solarSurge * 62 +
-        diurnalExcitation * 16 +
-        (n3 > 0.8 ? (n3 - 0.45) * 75 : n3 * 18);
+      // Q-burst transient calculation (suppressed during Baseline Quiet reference state)
+      const qBurstRaw = isQuietPresetWindow
+        ? 12 + n3 * 14
+        : solarSurge * 62 +
+          diurnalExcitation * 16 +
+          (n3 > 0.8 ? (n3 - 0.45) * 75 : n3 * 18);
       const q_burst_intensity = Number(
         Math.min(99, Math.max(4, qBurstRaw)).toFixed(1)
       );
