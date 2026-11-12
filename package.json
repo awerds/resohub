@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy": "GITHUB_ACTIONS=true next build && touch out/.nojekyll && git -C out init && git -C out checkout -B gh-pages && git -C out add -A && git -C out commit -m 'deploy: static production build' && git -C out push -f https://github.com/awerds/resohub.git gh-pages:gh-pages && rm -rf out"
   },
   "dependencies": {
     "clsx": "^2.1.1",
