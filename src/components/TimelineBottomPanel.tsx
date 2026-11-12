@@ -97,7 +97,7 @@ export default function TimelineBottomPanel() {
             <button
               type="button"
               onClick={togglePlay}
-              className={`flex h-7 items-center gap-1 rounded-lg border px-2.5 font-mono text-[11px] font-bold tracking-wider uppercase transition md:h-8 md:gap-1.5 md:px-3.5 md:text-xs ${
+              className={`flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-lg border px-2.5 font-mono text-[11px] font-bold tracking-wider uppercase transition md:h-8 md:gap-1.5 md:px-3.5 md:text-xs ${
                 isPlaying
                   ? "border-amber-400/60 bg-amber-500/20 text-amber-200 shadow-[0_0_15px_rgba(245,158,11,0.25)]"
                   : "border-cyan-400/60 bg-cyan-500/20 text-cyan-200 hover:bg-cyan-500/30 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
@@ -105,12 +105,12 @@ export default function TimelineBottomPanel() {
             >
               {isPlaying ? (
                 <>
-                  <Pause className="h-3 w-3 fill-current md:h-3.5 md:w-3.5" aria-hidden="true" />
+                  <Pause className="h-3 w-3 shrink-0 fill-current md:h-3.5 md:w-3.5" aria-hidden="true" />
                   <span>PAUSE</span>
                 </>
               ) : (
                 <>
-                  <Play className="h-3 w-3 fill-current md:h-3.5 md:w-3.5" aria-hidden="true" />
+                  <Play className="h-3 w-3 shrink-0 fill-current md:h-3.5 md:w-3.5" aria-hidden="true" />
                   <span>PLAY</span>
                 </>
               )}
@@ -121,19 +121,19 @@ export default function TimelineBottomPanel() {
               onClick={() => stepTime(1)}
               aria-label="Step Forward 1 Hour"
               title="Step Forward 1 Hour"
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-300 transition hover:border-cyan-500/40 hover:text-cyan-300 md:h-8 md:w-8"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-300 transition hover:border-cyan-500/40 hover:text-cyan-300 md:h-8 md:w-8"
             >
               <SkipForward className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
 
             {/* Speed selector */}
-            <div className="flex items-center rounded-lg border border-slate-800 bg-slate-900/90 p-0.5 font-mono text-[10px] md:ml-1 md:text-[11px]">
+            <div className="flex shrink-0 items-center whitespace-nowrap rounded-lg border border-slate-800 bg-slate-900/90 p-0.5 font-mono text-[10px] md:ml-1 md:text-[11px]">
               {([1, 2, 4] as const).map((spd) => (
                 <button
                   key={spd}
                   type="button"
                   onClick={() => setPlaybackSpeed(spd)}
-                  className={`rounded-md px-1.5 py-0.5 transition md:px-2 ${
+                  className={`whitespace-nowrap rounded-md px-1.5 py-0.5 transition md:px-2 ${
                     playbackSpeed === spd
                       ? "bg-cyan-500/25 text-cyan-300 font-bold"
                       : "text-slate-400 hover:text-slate-200"
@@ -146,7 +146,7 @@ export default function TimelineBottomPanel() {
           </div>
 
           {/* Active Timestamp & Offset Badge */}
-          <div className="flex items-center gap-1.5 rounded-xl border border-slate-800/90 bg-slate-950/90 px-2.5 py-1 font-mono md:gap-2.5 md:px-3.5 md:py-1.5">
+          <div className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border border-slate-800/90 bg-slate-950/90 px-2 py-1 font-mono md:gap-2.5 md:px-3.5 md:py-1.5">
             <Clock className="hidden sm:inline h-3.5 w-3.5 text-cyan-400" aria-hidden="true" />
             <label
               htmlFor="temporal-scrubber"

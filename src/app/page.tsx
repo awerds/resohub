@@ -111,7 +111,7 @@ export default function ResonanceDashboardPage() {
         </div>
 
         {/* Center Live Status Ticker */}
-        <div className="hidden xl:flex items-center gap-5 rounded-lg border border-slate-800/80 bg-slate-950/70 px-4 py-1 font-mono text-xs">
+        <div className="hidden xl:flex shrink-0 whitespace-nowrap items-center gap-5 rounded-lg border border-slate-800/80 bg-slate-950/70 px-4 py-1 font-mono text-xs">
           <div className="flex items-center gap-2">
             <Waves className="h-3.5 w-3.5 text-cyan-400" aria-hidden="true" />
             <span className="text-slate-400">FUNDAMENTAL:</span>
