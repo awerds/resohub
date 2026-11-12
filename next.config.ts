@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const isGithubPages = process.env.GITHUB_ACTIONS === "true";
+
 const securityHeaders = [
   {
     key: "Strict-Transport-Security",
@@ -39,8 +41,11 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  cacheComponents: true,
-  partialPrefetching: true,
+  output: isGithubPages ? "export" : undefined,
+  basePath: isGithubPages ? "/resohub" : "",
+  images: {
+    unoptimized: true,
+  },
   turbopack: {
     rules: {
       "*.css": {
@@ -49,14 +54,20 @@ const nextConfig: NextConfig = {
       },
     },
   },
-  async headers() {
-    return [
-      {
-        source: "/(.*)",
-        headers: securityHeaders,
-      },
-    ];
-  },
+  ...(isGithubPages
+    ? {}
+    : {
+        cacheComponents: true,
+        partialPrefetching: true,
+        async headers() {
+          return [
+            {
+              source: "/(.*)",
+              headers: securityHeaders,
+            },
+          ];
+        },
+      }),
 };
 
 export default nextConfig;
