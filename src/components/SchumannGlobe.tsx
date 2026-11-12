@@ -682,50 +682,57 @@ export default function SchumannGlobe() {
             wrapper.style.transform = "translate(-50%, -120%)";
             wrapper.style.transition = "transform 150ms ease";
 
-            wrapper.innerHTML = `
-              <div style="
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                padding: 4px 8px;
-                border-radius: 6px;
-                background: ${
-                  isSelected
-                    ? "rgba(8, 47, 73, 0.92)"
-                    : "rgba(2, 6, 23, 0.84)"
-                };
-                border: 1.5px solid ${
-                  isSelected ? "#22d3ee" : accentColor
-                };
-                box-shadow: ${
-                  isSelected
-                    ? "0 0 18px rgba(34, 211, 238, 0.55)"
-                    : "0 4px 12px rgba(0, 0, 0, 0.65)"
-                };
-                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-                white-space: nowrap;
-                backdrop-filter: blur(6px);
-              ">
-                <span style="
-                  width: 8px;
-                  height: 8px;
-                  border-radius: 9999px;
-                  background: ${accentColor};
-                  box-shadow: 0 0 8px ${accentColor};
-                  display: inline-block;
-                "></span>
-                <div style="display: flex; flex-direction: column; line-height: 1.1;">
-                  <span style="font-size: 10px; font-weight: 700; color: ${
-                    isSelected ? "#67e8f9" : "#e2e8f0"
-                  }; letter-spacing: 0.06em;">
-                    ${rec.location_id}
-                  </span>
-                  <span style="font-size: 9px; color: ${accentColor}; font-weight: 600;">
-                    ${readout}
-                  </span>
-                </div>
-              </div>
-            `;
+            const badge = document.createElement("div");
+            badge.style.display = "flex";
+            badge.style.alignItems = "center";
+            badge.style.gap = "6px";
+            badge.style.padding = "4px 8px";
+            badge.style.borderRadius = "6px";
+            badge.style.background = isSelected
+              ? "rgba(8, 47, 73, 0.92)"
+              : "rgba(2, 6, 23, 0.84)";
+            badge.style.border = `1.5px solid ${
+              isSelected ? "#22d3ee" : accentColor
+            }`;
+            badge.style.boxShadow = isSelected
+              ? "0 0 18px rgba(34, 211, 238, 0.55)"
+              : "0 4px 12px rgba(0, 0, 0, 0.65)";
+            badge.style.fontFamily =
+              "ui-monospace, SFMono-Regular, Menlo, monospace";
+            badge.style.whiteSpace = "nowrap";
+            badge.style.backdropFilter = "blur(6px)";
+
+            const dot = document.createElement("span");
+            dot.style.width = "8px";
+            dot.style.height = "8px";
+            dot.style.borderRadius = "9999px";
+            dot.style.background = accentColor;
+            dot.style.boxShadow = `0 0 8px ${accentColor}`;
+            dot.style.display = "inline-block";
+
+            const textCol = document.createElement("div");
+            textCol.style.display = "flex";
+            textCol.style.flexDirection = "column";
+            textCol.style.lineHeight = "1.1";
+
+            const titleSpan = document.createElement("span");
+            titleSpan.style.fontSize = "10px";
+            titleSpan.style.fontWeight = "700";
+            titleSpan.style.color = isSelected ? "#67e8f9" : "#e2e8f0";
+            titleSpan.style.letterSpacing = "0.06em";
+            titleSpan.textContent = rec.location_id;
+
+            const valueSpan = document.createElement("span");
+            valueSpan.style.fontSize = "9px";
+            valueSpan.style.color = accentColor;
+            valueSpan.style.fontWeight = "600";
+            valueSpan.textContent = readout;
+
+            textCol.appendChild(titleSpan);
+            textCol.appendChild(valueSpan);
+            badge.appendChild(dot);
+            badge.appendChild(textCol);
+            wrapper.appendChild(badge);
 
             wrapper.onclick = (e) => {
               e.stopPropagation();
