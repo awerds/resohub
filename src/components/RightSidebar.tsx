@@ -17,7 +17,7 @@ import {
   Thermometer,
   Wind,
 } from "lucide-react";
-import { getSchumannDataset } from "@/lib/schumann-data";
+import { getSchumannDataset, STATIONS } from "@/lib/schumann-data";
 import { useResonanceStore } from "@/store/useResonanceStore";
 import {
   AmplitudeAndQualityWidget,
@@ -81,17 +81,18 @@ export default function RightSidebar() {
 
   if (!isRightSidebarOpen || !selectedStationId) {
     return (
-      <div className="relative z-30 flex h-full items-start border-l border-slate-800/80 bg-[#050b16]/95 p-2">
+      <div className="relative z-30 hidden h-full items-start border-l border-slate-800/80 bg-[#050b16]/95 p-2 lg:flex">
         <button
           type="button"
           onClick={() => {
             if (!selectedStationId) selectStation("TOMSK-RU", false);
             setRightSidebarOpen(true);
           }}
+          aria-label="Expand Station Analytics & Spectrogram"
           title="Expand Station Analytics & Spectrogram"
           className="flex flex-col items-center gap-2 rounded-xl border border-cyan-500/30 bg-slate-900/90 px-2 py-3 text-cyan-300 transition hover:border-cyan-400 hover:bg-cyan-500/15"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           <span
             className="font-mono text-[10px] font-bold tracking-[0.2em] uppercase"
             style={{ writingMode: "vertical-rl" }}
@@ -107,10 +108,41 @@ export default function RightSidebar() {
   const activeQBurstEvent = currentGlobal.q_burst_event;
 
   return (
-    <aside className="flex h-full w-[415px] shrink-0 flex-col border-l border-slate-800/80 bg-[#050b16]/95 text-slate-100 backdrop-blur-xl overflow-y-auto">
-      {/* Header: Station Identification & Coordinates */}
-      <div className="sticky top-0 z-20 border-b border-slate-800/90 bg-[#050b16]/95 p-3.5 backdrop-blur-md">
-        <div className="flex items-start justify-between gap-2">
+    <>
+      {/* Mobile Backdrop Overlay (Tap outside to dismiss inspector on <1024px) */}
+      <div
+        aria-hidden="true"
+        onClick={() => setRightSidebarOpen(false)}
+        className="fixed inset-0 z-30 bg-slate-950/70 backdrop-blur-xs lg:hidden"
+      />
+      <aside
+        aria-label="Station Spectrogram and Telemetry Inspector"
+        className="fixed inset-y-0 right-0 z-40 flex h-full w-[min(26.5rem,94dvw)] shrink-0 flex-col border-l border-slate-800/80 bg-[#050b16]/98 text-slate-100 shadow-2xl backdrop-blur-xl overflow-y-auto lg:relative lg:inset-auto lg:z-20 lg:w-[415px] lg:bg-[#050b16]/95 lg:shadow-none"
+      >
+        {/* Header: Station Identification & Coordinates */}
+        <div className="sticky top-0 z-20 border-b border-slate-800/90 bg-[#050b16]/95 p-3.5 backdrop-blur-md">
+          {/* Mobile Quick Station Switcher Strip inside Inspector */}
+          <div className="mb-2.5 flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar lg:hidden">
+            {STATIONS.map((st) => {
+              const active = st.location_id === currentRecord.location_id;
+              return (
+                <button
+                  key={st.location_id}
+                  type="button"
+                  onClick={() => selectStation(st.location_id, true)}
+                  className={`shrink-0 rounded-md border px-2 py-1 font-mono text-[10px] font-bold transition ${
+                    active
+                      ? "border-cyan-400 bg-cyan-500/25 text-cyan-200"
+                      : "border-slate-800 bg-slate-900/80 text-slate-400"
+                  }`}
+                >
+                  {st.location_id.split("-")[0]}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="inline-flex items-center gap-1 rounded bg-cyan-500/15 px-1.5 py-0.5 font-mono text-[10px] font-bold text-cyan-300 border border-cyan-500/30">
@@ -162,10 +194,11 @@ export default function RightSidebar() {
           <button
             type="button"
             onClick={() => setRightSidebarOpen(false)}
+            aria-label="Collapse Analytics Panel"
             title="Collapse Analytics Panel"
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-400 transition hover:border-slate-700 hover:text-white"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 
@@ -456,6 +489,7 @@ export default function RightSidebar() {
           )}
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

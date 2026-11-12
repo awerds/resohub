@@ -120,12 +120,20 @@ export default function SchumannGlobe() {
   const selectQBurstEpicenter = useResonanceStore(
     (s) => s.selectQBurstEpicenter
   );
+  const setRightSidebarOpen = useResonanceStore((s) => s.setRightSidebarOpen);
   const toggleLayer = useResonanceStore((s) => s.toggleLayer);
   const resetGlobeView = useResonanceStore((s) => s.resetGlobeView);
 
   const currentRecords = useMemo(
     () => dataset.recordsByTime[timeIndex] || dataset.recordsByTime[0],
     [dataset, timeIndex]
+  );
+
+  const selectedStationRecord = useMemo(
+    () =>
+      currentRecords.find((r) => r.location_id === selectedStationId) ||
+      currentRecords[0],
+    [currentRecords, selectedStationId]
   );
 
   const currentGlobal = useMemo(
@@ -529,8 +537,61 @@ export default function SchumannGlobe() {
       />
 
       {/* Top HUD Telemetry Bar floating over the center viewport */}
-      <div className="pointer-events-none absolute top-3.5 right-3.5 left-3.5 z-20 flex flex-wrap items-start justify-between gap-2.5">
-        <div className="pointer-events-auto flex flex-wrap items-center gap-3.5 rounded-xl border border-cyan-500/25 bg-slate-950/85 px-3.5 py-2 shadow-[0_0_30px_rgba(6,182,212,0.12)] backdrop-blur-md">
+      <div className="pointer-events-none absolute top-2 right-2 left-2 z-20 flex flex-wrap items-start justify-between gap-2 md:top-3.5 md:right-3.5 md:left-3.5 md:gap-2.5">
+        {/* Compact Mobile Top HUD Pill (< md) */}
+        <div className="pointer-events-auto flex flex-wrap items-center gap-2 rounded-xl border border-cyan-500/25 bg-slate-950/85 px-2.5 py-1.5 font-mono text-[11px] shadow-[0_0_24px_rgba(6,182,212,0.12)] backdrop-blur-md md:hidden">
+          <span className="inline-flex items-center gap-1.5 font-bold text-cyan-300">
+            <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
+            f{selectedHarmonic}{" "}
+            {selectedHarmonic === 1
+              ? currentGlobal.global_primary_frequency.toFixed(2)
+              : (
+                  currentGlobal.global_primary_frequency *
+                  (selectedHarmonic * 0.91 + 0.09)
+                ).toFixed(1)}{" "}
+            Hz
+          </span>
+          <span className="text-slate-700">|</span>
+          <span className="text-emerald-300 font-semibold">
+            {currentGlobal.global_amplitude.toFixed(1)} pT²/Hz
+          </span>
+          <span className="text-slate-700">|</span>
+          <span className="text-sky-300">
+            h_D {currentGlobal.mean_d_region_km}km
+          </span>
+          <span
+            className={`rounded px-1.5 py-0.5 text-[10px] font-bold border ${
+              currentGlobal.kp_index >= 5
+                ? "border-rose-500/40 bg-rose-500/15 text-rose-300"
+                : currentGlobal.kp_index >= 3.5
+                ? "border-amber-500/40 bg-amber-500/15 text-amber-300"
+                : "border-emerald-500/40 bg-emerald-500/15 text-emerald-300"
+            }`}
+          >
+            Kp {currentGlobal.kp_index.toFixed(1)}
+          </span>
+          {currentGlobal.active_q_bursts > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                if (currentGlobal.q_burst_event) {
+                  selectQBurstEpicenter(
+                    currentGlobal.q_burst_event.epicenter_lat,
+                    currentGlobal.q_burst_event.epicenter_lng,
+                    true
+                  );
+                }
+              }}
+              className="flex items-center gap-0.5 rounded bg-rose-500/20 px-1.5 py-0.5 text-[10px] font-bold text-rose-300 border border-rose-500/40"
+            >
+              <Zap className="h-2.5 w-2.5 text-rose-400" aria-hidden="true" />
+              <span>{currentGlobal.active_q_bursts} Q</span>
+            </button>
+          )}
+        </div>
+
+        {/* Full Desktop/Tablet Top HUD Card (md+) */}
+        <div className="pointer-events-auto hidden md:flex flex-wrap items-center gap-3.5 rounded-xl border border-cyan-500/25 bg-slate-950/85 px-3.5 py-2 shadow-[0_0_30px_rgba(6,182,212,0.12)] backdrop-blur-md">
           <div className="flex items-center gap-2.5 pr-3 border-r border-slate-800">
             <span className="relative flex h-2.5 w-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
@@ -639,28 +700,31 @@ export default function SchumannGlobe() {
         </div>
 
         {/* Right Floating Camera Controls */}
-        <div className="pointer-events-auto flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-950/85 p-1.5 backdrop-blur-md">
+        <div className="pointer-events-auto flex items-center gap-1 rounded-xl border border-slate-800 bg-slate-950/85 p-1 backdrop-blur-md md:gap-1.5 md:p-1.5">
           <button
             type="button"
             onClick={() => handleZoom(0.78)}
+            aria-label="Zoom In"
             title="Zoom In"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 transition hover:bg-cyan-500/15 hover:text-cyan-300"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-300 transition hover:bg-cyan-500/15 hover:text-cyan-300 md:h-8 md:w-8"
           >
-            <ZoomIn className="h-4 w-4" />
+            <ZoomIn className="h-3.5 w-3.5 md:h-4 md:w-4" aria-hidden="true" />
           </button>
           <button
             type="button"
             onClick={() => handleZoom(1.25)}
+            aria-label="Zoom Out"
             title="Zoom Out"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 transition hover:bg-cyan-500/15 hover:text-cyan-300"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-300 transition hover:bg-cyan-500/15 hover:text-cyan-300 md:h-8 md:w-8"
           >
-            <ZoomOut className="h-4 w-4" />
+            <ZoomOut className="h-3.5 w-3.5 md:h-4 md:w-4" aria-hidden="true" />
           </button>
           <button
             type="button"
             onClick={() => toggleLayer("autoRotateGlobe")}
+            aria-label="Toggle Orbital Auto-Rotation"
             title="Toggle Orbital Auto-Rotation"
-            className={`flex h-8 items-center gap-1.5 rounded-lg px-2.5 font-mono text-xs transition ${
+            className={`flex h-7 items-center gap-1.5 rounded-lg px-2 font-mono text-xs transition md:h-8 md:px-2.5 ${
               layers.autoRotateGlobe
                 ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
                 : "text-slate-300 hover:bg-slate-800"
@@ -670,16 +734,18 @@ export default function SchumannGlobe() {
               className={`h-3.5 w-3.5 ${
                 layers.autoRotateGlobe ? "animate-spin" : ""
               }`}
+              aria-hidden="true"
             />
             <span className="hidden sm:inline">ORBIT</span>
           </button>
           <button
             type="button"
             onClick={resetGlobeView}
+            aria-label="Reset Global Perspective"
             title="Reset Global Perspective"
-            className="flex h-8 items-center gap-1.5 rounded-lg px-2.5 font-mono text-xs text-slate-300 transition hover:bg-cyan-500/15 hover:text-cyan-300"
+            className="flex h-7 items-center gap-1.5 rounded-lg px-2 font-mono text-xs text-slate-300 transition hover:bg-cyan-500/15 hover:text-cyan-300 md:h-8 md:px-2.5"
           >
-            <Compass className="h-3.5 w-3.5" />
+            <Compass className="h-3.5 w-3.5" aria-hidden="true" />
             <span className="hidden sm:inline">RESET</span>
           </button>
         </div>
@@ -700,8 +766,10 @@ export default function SchumannGlobe() {
           onGlobeReady={() => {
             setGlobeReady(true);
             if (globeRef.current) {
+              const isNarrow =
+                typeof window !== "undefined" && window.innerWidth < 640;
               globeRef.current.pointOfView(
-                { lat: 28, lng: 35, altitude: 2.15 },
+                { lat: 25, lng: 30, altitude: isNarrow ? 2.65 : 2.15 },
                 0
               );
             }
@@ -879,9 +947,59 @@ export default function SchumannGlobe() {
         />
       )}
 
-      {/* Bottom-Left Legend & Quick Station Strip */}
-      <div className="pointer-events-none absolute bottom-3.5 left-3.5 right-3.5 z-20 flex flex-wrap items-end justify-between gap-2.5">
-        <div className="pointer-events-auto rounded-xl border border-slate-800/90 bg-slate-950/85 px-3.5 py-2 backdrop-blur-md">
+      {/* Bottom-Left Legend, Mobile Active Station Card & Quick Station Strip */}
+      <div className="pointer-events-none absolute right-2 bottom-2 left-2 z-20 flex flex-col gap-1.5 md:right-3.5 md:bottom-3.5 md:left-3.5 md:flex-row md:flex-wrap md:items-end md:justify-between md:gap-2.5">
+        {/* Mobile Active Station / Q-Burst Quick Readout + 1-Tap Spectrogram Opener (< lg) */}
+        <div className="pointer-events-auto flex items-center justify-between gap-2 rounded-xl border border-cyan-500/35 bg-slate-950/90 px-3 py-1.5 font-mono shadow-lg backdrop-blur-md lg:hidden">
+          {inspectingQBurst && currentGlobal.q_burst_event ? (
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-rose-300">
+                <Crosshair className="h-3 w-3 shrink-0 text-rose-400" aria-hidden="true" />
+                <span className="truncate">
+                  ⚡ {currentGlobal.q_burst_event.event_id} ·{" "}
+                  {currentGlobal.q_burst_event.region_name}
+                </span>
+              </div>
+              <div className="text-[10px] text-slate-400">
+                {currentGlobal.q_burst_event.charge_moment_c_km} C·km · Peak{" "}
+                {currentGlobal.q_burst_event.peak_current_ka} kA
+              </div>
+            </div>
+          ) : (
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-white">
+                <span className="h-2 w-2 shrink-0 rounded-full bg-cyan-400" />
+                <span className="truncate">
+                  {selectedStationRecord.location_id} ({selectedStationRecord.region})
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] text-slate-300">
+                <span className="text-cyan-300 font-semibold">
+                  {selectedStationRecord.primary_frequency.toFixed(2)} Hz
+                </span>
+                <span>·</span>
+                <span className="text-emerald-300">
+                  {selectedStationRecord.amplitude.toFixed(1)} pT²/Hz
+                </span>
+                <span>·</span>
+                <span className="text-slate-400">
+                  h_D {selectedStationRecord.metadata.ionospheric_cavity_height_km}km
+                </span>
+              </div>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setRightSidebarOpen(true)}
+            className="shrink-0 rounded-lg border border-cyan-400/50 bg-cyan-500/20 px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase text-cyan-200 transition hover:bg-cyan-500/30"
+          >
+            {inspectingQBurst ? "Δt Matrix →" : "Spectrogram →"}
+          </button>
+        </div>
+
+        {/* Scale Bar Legend (Hidden on extra-small portrait phones to preserve 3D globe canvas, shown sm+) */}
+        <div className="pointer-events-auto hidden sm:block rounded-xl border border-slate-800/90 bg-slate-950/85 px-3.5 py-2 backdrop-blur-md">
           <div className="mb-1 flex items-center justify-between gap-4">
             <span className="font-mono text-[10px] font-semibold tracking-[0.16em] uppercase text-slate-400">
               Cavity Field Overlay:{" "}
@@ -922,8 +1040,8 @@ export default function SchumannGlobe() {
           </div>
         </div>
 
-        {/* Quick-Jump Station & Q-Burst Epicenter Strip */}
-        <div className="pointer-events-auto flex flex-wrap items-center gap-1 rounded-xl border border-slate-800/90 bg-slate-950/85 p-1.5 backdrop-blur-md">
+        {/* Quick-Jump Station & Q-Burst Epicenter Strip (Horizontally scrollable touch strip on mobile, wrapped on md+) */}
+        <div className="pointer-events-auto flex w-full items-center gap-1 overflow-x-auto rounded-xl border border-slate-800/90 bg-slate-950/85 p-1.5 backdrop-blur-md no-scrollbar md:w-auto md:flex-wrap">
           {currentGlobal.q_burst_event && (
             <button
               type="button"
@@ -934,28 +1052,29 @@ export default function SchumannGlobe() {
                   true
                 )
               }
-              className={`flex items-center gap-1 rounded-lg px-2 py-1 font-mono text-[10px] font-bold transition ${
+              className={`flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 font-mono text-[10px] font-bold transition ${
                 inspectingQBurst
                   ? "bg-rose-500/30 text-rose-200 border border-rose-400"
                   : "bg-rose-500/15 text-rose-300 border border-rose-500/30 hover:bg-rose-500/25"
               }`}
             >
-              <Crosshair className="h-3 w-3" />
+              <Crosshair className="h-3 w-3" aria-hidden="true" />
               <span>⚡ Δt SOURCE</span>
             </button>
           )}
-          <span className="px-1.5 font-mono text-[10px] tracking-widest uppercase text-slate-400 flex items-center gap-1">
-            <Radio className="h-3 w-3 text-cyan-400" />
+          <span className="hidden sm:flex shrink-0 px-1.5 font-mono text-[10px] tracking-widest uppercase text-slate-400 items-center gap-1">
+            <Radio className="h-3 w-3 text-cyan-400" aria-hidden="true" />
             Nodes:
           </span>
           {currentRecords.map((rec) => {
-            const isSelected = rec.location_id === selectedStationId && !inspectingQBurst;
+            const isSelected =
+              rec.location_id === selectedStationId && !inspectingQBurst;
             return (
               <button
                 key={rec.location_id}
                 type="button"
                 onClick={() => selectStation(rec.location_id, true)}
-                className={`flex items-center gap-1.5 rounded-lg px-2 py-1 font-mono text-[11px] transition ${
+                className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1 font-mono text-[11px] transition ${
                   isSelected
                     ? "bg-cyan-500/25 text-cyan-200 border border-cyan-400/50 shadow-[0_0_12px_rgba(34,211,238,0.25)]"
                     : "text-slate-300 hover:bg-slate-800/80 hover:text-white border border-transparent"
@@ -969,7 +1088,7 @@ export default function SchumannGlobe() {
                 />
                 <span>{rec.location_id.split("-")[0]}</span>
                 {rec.is_q_burst && (
-                  <Sparkles className="h-2.5 w-2.5 text-rose-400" />
+                  <Sparkles className="h-2.5 w-2.5 text-rose-400" aria-hidden="true" />
                 )}
               </button>
             );

@@ -170,14 +170,15 @@ export default function LeftSidebar() {
 
   if (!isLeftSidebarOpen) {
     return (
-      <div className="relative z-30 flex h-full items-start border-r border-slate-800/80 bg-[#050b16]/95 p-2">
+      <div className="relative z-30 hidden h-full items-start border-r border-slate-800/80 bg-[#050b16]/95 p-2 lg:flex">
         <button
           type="button"
           onClick={() => setLeftSidebarOpen(true)}
+          aria-label="Expand Layer & Sensor Controls"
           title="Expand Layer & Sensor Controls"
           className="flex flex-col items-center gap-2 rounded-xl border border-cyan-500/30 bg-slate-900/90 px-2 py-3 text-cyan-300 transition hover:border-cyan-400 hover:bg-cyan-500/15"
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-4 w-4" aria-hidden="true" />
           <span
             className="font-mono text-[10px] font-bold tracking-[0.2em] uppercase"
             style={{ writingMode: "vertical-rl" }}
@@ -190,24 +191,35 @@ export default function LeftSidebar() {
   }
 
   return (
-    <aside className="flex h-full w-80 shrink-0 flex-col border-r border-slate-800/80 bg-[#050b16]/95 text-slate-100 backdrop-blur-xl overflow-y-auto">
-      {/* Drawer Header with Collapse Toggle */}
-      <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800/90 bg-[#050b16]/95 px-3.5 py-2.5 backdrop-blur-md">
-        <div className="flex items-center gap-2">
-          <Radar className="h-3.5 w-3.5 text-cyan-400" />
-          <span className="font-mono text-[11px] font-bold tracking-[0.16em] uppercase text-slate-200">
-            Waveguide Controls
-          </span>
+    <>
+      {/* Mobile Backdrop Overlay (Tap outside to dismiss drawer on <1024px) */}
+      <div
+        aria-hidden="true"
+        onClick={() => setLeftSidebarOpen(false)}
+        className="fixed inset-0 z-30 bg-slate-950/70 backdrop-blur-xs lg:hidden"
+      />
+      <aside
+        aria-label="Waveguide and Sensor Controls"
+        className="fixed inset-y-0 left-0 z-40 flex h-full w-[min(21rem,88dvw)] shrink-0 flex-col border-r border-slate-800/80 bg-[#050b16]/98 text-slate-100 shadow-2xl backdrop-blur-xl overflow-y-auto lg:relative lg:inset-auto lg:z-20 lg:w-80 lg:bg-[#050b16]/95 lg:shadow-none"
+      >
+        {/* Drawer Header with Collapse Toggle */}
+        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800/90 bg-[#050b16]/95 px-3.5 py-2.5 backdrop-blur-md">
+          <div className="flex items-center gap-2">
+            <Radar className="h-3.5 w-3.5 text-cyan-400" aria-hidden="true" />
+            <span className="font-mono text-[11px] font-bold tracking-[0.16em] uppercase text-slate-200">
+              Waveguide Controls
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setLeftSidebarOpen(false)}
+            aria-label="Collapse Controls Sidebar"
+            title="Collapse Controls Sidebar"
+            className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-800 bg-slate-900 text-slate-300 transition hover:border-slate-700 hover:text-white"
+          >
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => setLeftSidebarOpen(false)}
-          title="Collapse Controls Sidebar"
-          className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-800 bg-slate-900 text-slate-400 transition hover:border-slate-700 hover:text-white"
-        >
-          <ChevronLeft className="h-3.5 w-3.5" />
-        </button>
-      </div>
 
       {/* Section 1: Telemetry Parameter Mode */}
       <div className="border-b border-slate-800/80 p-3">
@@ -520,6 +532,7 @@ export default function LeftSidebar() {
           </div>
         )}
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

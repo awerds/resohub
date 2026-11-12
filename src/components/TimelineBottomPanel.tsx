@@ -78,96 +78,101 @@ export default function TimelineBottomPanel() {
   const hoursAgo = TOTAL_TIME_STEPS - 1 - timeIndex;
 
   return (
-    <footer className="relative z-30 flex flex-col gap-2 border-t border-slate-800/90 bg-[#040914]/95 px-5 py-3 text-slate-100 backdrop-blur-xl">
+    <footer className="relative z-30 flex flex-col gap-1.5 border-t border-slate-800/90 bg-[#040914]/95 px-2.5 py-2 text-slate-100 backdrop-blur-xl md:gap-2 md:px-5 md:py-3">
       {/* Top Row: Playback Controls + Timestamp Readout + Event Presets */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        {/* Left: Transport Controls */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => stepTime(-1)}
-            title="Step Back 1 Hour"
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-300 transition hover:border-cyan-500/40 hover:text-cyan-300"
-          >
-            <SkipBack className="h-3.5 w-3.5" />
-          </button>
+      <div className="flex flex-col gap-1.5 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-3">
+        {/* Transport Controls + Active Timestamp Row */}
+        <div className="flex items-center justify-between gap-2 md:justify-start">
+          <div className="flex items-center gap-1.5 md:gap-2">
+            <button
+              type="button"
+              onClick={() => stepTime(-1)}
+              aria-label="Step Back 1 Hour"
+              title="Step Back 1 Hour"
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-300 transition hover:border-cyan-500/40 hover:text-cyan-300 md:h-8 md:w-8"
+            >
+              <SkipBack className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
 
-          <button
-            type="button"
-            onClick={togglePlay}
-            className={`flex h-8 items-center gap-1.5 rounded-lg border px-3.5 font-mono text-xs font-bold tracking-wider uppercase transition ${
-              isPlaying
-                ? "border-amber-400/60 bg-amber-500/20 text-amber-200 shadow-[0_0_15px_rgba(245,158,11,0.25)]"
-                : "border-cyan-400/60 bg-cyan-500/20 text-cyan-200 hover:bg-cyan-500/30 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
-            }`}
-          >
-            {isPlaying ? (
-              <>
-                <Pause className="h-3.5 w-3.5 fill-current" />
-                <span>PAUSE</span>
-              </>
-            ) : (
-              <>
-                <Play className="h-3.5 w-3.5 fill-current" />
-                <span>TIME-LAPSE</span>
-              </>
-            )}
-          </button>
+            <button
+              type="button"
+              onClick={togglePlay}
+              className={`flex h-7 items-center gap-1 rounded-lg border px-2.5 font-mono text-[11px] font-bold tracking-wider uppercase transition md:h-8 md:gap-1.5 md:px-3.5 md:text-xs ${
+                isPlaying
+                  ? "border-amber-400/60 bg-amber-500/20 text-amber-200 shadow-[0_0_15px_rgba(245,158,11,0.25)]"
+                  : "border-cyan-400/60 bg-cyan-500/20 text-cyan-200 hover:bg-cyan-500/30 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
+              }`}
+            >
+              {isPlaying ? (
+                <>
+                  <Pause className="h-3 w-3 fill-current md:h-3.5 md:w-3.5" aria-hidden="true" />
+                  <span>PAUSE</span>
+                </>
+              ) : (
+                <>
+                  <Play className="h-3 w-3 fill-current md:h-3.5 md:w-3.5" aria-hidden="true" />
+                  <span>PLAY</span>
+                </>
+              )}
+            </button>
 
-          <button
-            type="button"
-            onClick={() => stepTime(1)}
-            title="Step Forward 1 Hour"
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-300 transition hover:border-cyan-500/40 hover:text-cyan-300"
-          >
-            <SkipForward className="h-3.5 w-3.5" />
-          </button>
+            <button
+              type="button"
+              onClick={() => stepTime(1)}
+              aria-label="Step Forward 1 Hour"
+              title="Step Forward 1 Hour"
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-300 transition hover:border-cyan-500/40 hover:text-cyan-300 md:h-8 md:w-8"
+            >
+              <SkipForward className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
 
-          {/* Speed selector */}
-          <div className="ml-1 flex items-center rounded-lg border border-slate-800 bg-slate-900/90 p-0.5 font-mono text-[11px]">
-            {([1, 2, 4] as const).map((spd) => (
-              <button
-                key={spd}
-                type="button"
-                onClick={() => setPlaybackSpeed(spd)}
-                className={`rounded-md px-2 py-0.5 transition ${
-                  playbackSpeed === spd
-                    ? "bg-cyan-500/25 text-cyan-300 font-bold"
-                    : "text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                {spd}x
-              </button>
-            ))}
+            {/* Speed selector */}
+            <div className="flex items-center rounded-lg border border-slate-800 bg-slate-900/90 p-0.5 font-mono text-[10px] md:ml-1 md:text-[11px]">
+              {([1, 2, 4] as const).map((spd) => (
+                <button
+                  key={spd}
+                  type="button"
+                  onClick={() => setPlaybackSpeed(spd)}
+                  className={`rounded-md px-1.5 py-0.5 transition md:px-2 ${
+                    playbackSpeed === spd
+                      ? "bg-cyan-500/25 text-cyan-300 font-bold"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  {spd}x
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Active Timestamp & Offset Badge */}
+          <div className="flex items-center gap-1.5 rounded-xl border border-slate-800/90 bg-slate-950/90 px-2.5 py-1 font-mono md:gap-2.5 md:px-3.5 md:py-1.5">
+            <Clock className="hidden sm:inline h-3.5 w-3.5 text-cyan-400" aria-hidden="true" />
+            <label
+              htmlFor="temporal-scrubber"
+              className="text-[11px] font-bold tracking-wider text-white cursor-pointer md:text-xs"
+            >
+              <span className="sm:hidden">{formattedUtc.slice(5)}</span>
+              <span className="hidden sm:inline">{formattedUtc}</span>
+            </label>
+            <span
+              className={`rounded px-1.5 py-0.5 text-[9px] font-bold md:text-[10px] ${
+                hoursAgo === 0
+                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                  : "bg-slate-800 text-cyan-300"
+              }`}
+            >
+              {hoursAgo === 0
+                ? provenance.mode === "HYBRID_NOAA_LIVE"
+                  ? "NOW · NOAA"
+                  : "NOW · MODEL"
+                : `T-${hoursAgo}H`}
+            </span>
           </div>
         </div>
 
-        {/* Center: Active Timestamp, Offset & Data Provenance Transparency Badge */}
-        <div className="flex items-center gap-2.5 rounded-xl border border-slate-800/90 bg-slate-950/90 px-3.5 py-1.5 font-mono">
-          <Clock className="h-3.5 w-3.5 text-cyan-400" />
-          <label
-            htmlFor="temporal-scrubber"
-            className="text-xs font-bold tracking-wider text-white cursor-pointer"
-          >
-            {formattedUtc}
-          </label>
-          <span
-            className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
-              hoursAgo === 0
-                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                : "bg-slate-800 text-cyan-300"
-            }`}
-          >
-            {hoursAgo === 0
-              ? provenance.mode === "HYBRID_NOAA_LIVE"
-                ? "NOW · NOAA + MODEL"
-                : "NOW · SYNTHETIC MODEL"
-              : `T-${hoursAgo}H`}
-          </span>
-        </div>
-
-        {/* Right: Quick Historical Event Bookmarks */}
-        <div className="flex flex-wrap items-center gap-1.5">
+        {/* Quick Historical Event Bookmarks (Single-row touch scroll on mobile, wrapped on md+) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar md:flex-wrap">
           {EVENT_PRESETS.map((ev) => {
             const active = timeIndex === ev.index;
             return (
@@ -175,7 +180,7 @@ export default function TimelineBottomPanel() {
                 key={ev.label}
                 type="button"
                 onClick={() => setTimeIndex(ev.index)}
-                className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 font-mono text-[11px] transition ${
+                className={`flex shrink-0 items-center gap-1.5 rounded-lg border px-2 py-1 font-mono text-[10px] transition md:px-2.5 md:text-[11px] ${
                   active
                     ? "border-cyan-400/60 bg-cyan-500/20 text-cyan-200"
                     : "border-slate-800/90 bg-slate-900/60 text-slate-400 hover:border-slate-700 hover:text-slate-200"
@@ -237,16 +242,16 @@ export default function TimelineBottomPanel() {
         />
 
         {/* Timeline Axis Tick Labels */}
-        <div className="mt-0.5 flex justify-between px-1 font-mono text-[10px] text-slate-400 select-none">
-          <span>{dataset.timestamps[0]?.slice(5, 16).replace("T", " ")} UTC (T-71h)</span>
-          <span>{dataset.timestamps[18]?.slice(5, 16).replace("T", " ")} UTC</span>
-          <span>{dataset.timestamps[36]?.slice(5, 16).replace("T", " ")} UTC (T-35h)</span>
-          <span>{dataset.timestamps[54]?.slice(5, 16).replace("T", " ")} UTC</span>
+        <div className="mt-0.5 flex justify-between px-1 font-mono text-[9px] text-slate-400 select-none md:text-[10px]">
+          <span>{dataset.timestamps[0]?.slice(5, 16).replace("T", " ")} (T-71h)</span>
+          <span className="hidden sm:inline">{dataset.timestamps[18]?.slice(5, 16).replace("T", " ")} UTC</span>
+          <span>{dataset.timestamps[36]?.slice(5, 16).replace("T", " ")} (T-35h)</span>
+          <span className="hidden sm:inline">{dataset.timestamps[54]?.slice(5, 16).replace("T", " ")} UTC</span>
           <span className="text-emerald-400 font-semibold">
             {dataset.timestamps[TOTAL_TIME_STEPS - 1]
               ?.slice(5, 16)
               .replace("T", " ")}{" "}
-            UTC (NOW)
+            (NOW)
           </span>
         </div>
       </div>

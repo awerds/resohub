@@ -71,8 +71,10 @@ export default function InteractiveTourModal({
         "Formula: fₙ ≈ (c / 2πR_E)√(n(n+1)) damped by finite D-region conductivity, yielding eigenmodes at 7.83, 14.3, 20.8, 27.3, and 33.8 Hz.",
       actionLabel: "Reset Global Orbital View",
       onEnter: () => {
-        setLeftSidebarOpen(true);
-        setRightSidebarOpen(true);
+        const isMobile =
+          typeof window !== "undefined" && window.innerWidth < 1024;
+        setLeftSidebarOpen(!isMobile);
+        setRightSidebarOpen(!isMobile);
         setTimeIndex(55);
         setActiveMetric("amplitude");
         resetGlobeView();
@@ -107,9 +109,15 @@ export default function InteractiveTourModal({
         "High-latitude auroral observatories like SODANKYLA-FI (67.37°N) experience 1.42× stronger D-region compression, lowering Q and slightly depressing f₁.",
       actionLabel: "Compare Quiet (t=12) vs. Storm (t=55) at Sodankylä",
       onEnter: () => {
+        const isMobile =
+          typeof window !== "undefined" && window.innerWidth < 1024;
         setActiveMetric("amplitude");
         setTimeIndex(55);
         selectStation("SODANKYLA-FI", true);
+        if (isMobile) {
+          setLeftSidebarOpen(false);
+          setRightSidebarOpen(false);
+        }
       },
     },
     {
@@ -125,8 +133,8 @@ export default function InteractiveTourModal({
       actionLabel: "Triangulate Active Super-Bolt Epicenter",
       onEnter: () => {
         setTimeIndex(55);
-        setRightSidebarOpen(true);
         selectQBurstEpicenter(-2.4, 23.8, true);
+        setRightSidebarOpen(true);
       },
     },
     {
@@ -141,9 +149,9 @@ export default function InteractiveTourModal({
         "Because TM₀ propagation is transverse-magnetic, the H_NS / H_EW power ratio reveals the azimuthal bearing of the active thunderstorm chimney.",
       actionLabel: "Activate Dual H_NS + H_EW Trace Overlay",
       onEnter: () => {
-        setRightSidebarOpen(true);
         selectStation("TOMSK-RU", true);
         setPolarizationMode("DUAL_H");
+        setRightSidebarOpen(true);
       },
     },
     {
@@ -158,9 +166,15 @@ export default function InteractiveTourModal({
         "The 72-hour window automatically advances with the live UTC hour so shared links always reflect the latest 72-hour telemetry window.",
       actionLabel: "Restore Default View & Finish",
       onEnter: () => {
+        const isMobile =
+          typeof window !== "undefined" && window.innerWidth < 1024;
         setPolarizationMode("TOTAL");
         setTimeIndex(55);
         resetGlobeView();
+        if (isMobile) {
+          setLeftSidebarOpen(false);
+          setRightSidebarOpen(false);
+        }
       },
     },
   ];
@@ -266,18 +280,18 @@ export default function InteractiveTourModal({
         id="welcome-mission-dialog"
         aria-labelledby="welcome-mission-title"
         {...({ closedby: "any" } as Record<string, string>)}
-        className="m-auto w-full max-w-2xl rounded-2xl border border-cyan-500/40 bg-[#050b16]/95 p-0 text-slate-100 shadow-[0_0_60px_rgba(6,182,212,0.22)] backdrop-blur-2xl open:flex open:flex-col"
+        className="m-auto max-h-[88dvh] w-[calc(100dvw-1.25rem)] max-w-2xl overflow-y-auto rounded-2xl border border-cyan-500/40 bg-[#050b16]/95 p-0 text-slate-100 shadow-[0_0_60px_rgba(6,182,212,0.22)] backdrop-blur-2xl open:flex open:flex-col"
       >
         {/* Top Banner */}
-        <div className="flex items-center justify-between border-b border-slate-800/90 bg-slate-950/80 px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/40 bg-cyan-500/15 text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.25)]">
-              <Globe2 className="h-5 w-5" />
+        <div className="flex items-start justify-between gap-2 border-b border-slate-800/90 bg-slate-950/80 px-4 py-3 sm:items-center sm:px-6 sm:py-4">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cyan-400/40 bg-cyan-500/15 text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.25)] sm:h-10 sm:w-10">
+              <Globe2 className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-bold tracking-[0.2em] uppercase text-cyan-400">
-                  RESO // EARTH-ELF TELEMETRY
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <span className="font-mono text-[10px] font-bold tracking-[0.18em] uppercase text-cyan-400 sm:text-xs">
+                  RESO // EARTH-ELF
                 </span>
                 <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 font-mono text-[9px] font-bold text-emerald-300 border border-emerald-500/30">
                   7.83 Hz CAVITY
@@ -285,7 +299,7 @@ export default function InteractiveTourModal({
               </div>
               <h2
                 id="welcome-mission-title"
-                className="mt-0.5 font-mono text-lg font-bold text-white"
+                className="mt-0.5 font-mono text-sm font-bold text-white sm:text-lg"
               >
                 Global Schumann Resonance Command Center
               </h2>
@@ -298,16 +312,16 @@ export default function InteractiveTourModal({
               value="cancel"
               aria-label="Close welcome dialog"
               onClick={handlePersistPreference}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-400 transition hover:border-slate-700 hover:text-white"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-400 transition hover:border-slate-700 hover:text-white"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
           </form>
         </div>
 
         {/* Modal Body */}
-        <div className="space-y-4 px-6 py-5">
-          <p className="text-sm leading-relaxed text-slate-300">
+        <div className="space-y-3 px-4 py-3.5 sm:space-y-4 sm:px-6 sm:py-5 overflow-y-auto">
+          <p className="text-xs leading-relaxed text-slate-300 sm:text-sm">
             Welcome to <strong className="text-white">RESO // EARTH-ELF</strong>
             —an interactive 3D planetary visualization and spectral analysis
             platform for tracking electromagnetic standing waves in the
@@ -316,46 +330,46 @@ export default function InteractiveTourModal({
           </p>
 
           {/* 4 Subsystem Preview Cards */}
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-            <div className="rounded-xl border border-slate-800/90 bg-slate-900/50 p-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-2.5">
+            <div className="rounded-xl border border-slate-800/90 bg-slate-900/50 p-2.5 sm:p-3">
               <div className="flex items-center gap-2 font-mono text-xs font-bold text-cyan-300">
-                <Waves className="h-4 w-4" />
+                <Waves className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span>3D Waveguide & Eigenmodes</span>
               </div>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-[11px] text-slate-400 sm:text-xs">
                 Inspect fundamental (7.83 Hz) through 5th harmonic (33.8 Hz)
                 standing waves and Kp-coupled D-region altitude compression.
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-800/90 bg-slate-900/50 p-3">
+            <div className="rounded-xl border border-slate-800/90 bg-slate-900/50 p-2.5 sm:p-3">
               <div className="flex items-center gap-2 font-mono text-xs font-bold text-rose-300">
-                <Crosshair className="h-4 w-4" />
+                <Crosshair className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span>Q-Burst Δt Geolocation</span>
               </div>
-              <p className="mt-1 text-xs text-slate-400">
-                Click any super-bolt shockwave ring on the 3D globe to
+              <p className="mt-1 text-[11px] text-slate-400 sm:text-xs">
+                Tap any super-bolt shockwave ring on the 3D globe to
                 triangulate sub-millisecond arrival times (v_p ≈ 0.78c).
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-800/90 bg-slate-900/50 p-3">
+            <div className="rounded-xl border border-slate-800/90 bg-slate-900/50 p-2.5 sm:p-3">
               <div className="flex items-center gap-2 font-mono text-xs font-bold text-emerald-300">
-                <Activity className="h-4 w-4" />
+                <Activity className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span>2D Waterfall & Polarization</span>
               </div>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-[11px] text-slate-400 sm:text-xs">
                 Analyze 2–42 Hz dynamic spectrograms and toggle orthogonal
                 induction coil traces (H_NS vs. H_EW and vertical E_r).
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-800/90 bg-slate-900/50 p-3">
+            <div className="rounded-xl border border-slate-800/90 bg-slate-900/50 p-2.5 sm:p-3">
               <div className="flex items-center gap-2 font-mono text-xs font-bold text-amber-300">
-                <Database className="h-4 w-4" />
+                <Database className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span>72h Scrubber & NOAA Live Feed</span>
               </div>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-[11px] text-slate-400 sm:text-xs">
                 Scrub 72 hours of diurnal chimney cycles, trigger storm
                 benchmarks, and ingest live NOAA SWPC Kp & solar wind data.
               </p>
@@ -363,7 +377,7 @@ export default function InteractiveTourModal({
           </div>
 
           {/* Choice Callout */}
-          <div className="rounded-xl border border-cyan-500/25 bg-cyan-950/20 px-4 py-3 text-xs text-cyan-100/90">
+          <div className="rounded-xl border border-cyan-500/25 bg-cyan-950/20 px-3.5 py-2.5 text-xs text-cyan-100/90">
             Would you like to take a{" "}
             <strong className="text-cyan-300">
               6-step interactive guided tour
@@ -374,7 +388,7 @@ export default function InteractiveTourModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-800/90 bg-slate-950/80 px-6 py-4">
+        <div className="flex flex-col gap-3 border-t border-slate-800/90 bg-slate-950/80 px-4 py-3.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6 sm:py-4">
           <label className="flex cursor-pointer items-center gap-2 font-mono text-xs text-slate-400 hover:text-slate-200">
             <input
               type="checkbox"
@@ -385,11 +399,11 @@ export default function InteractiveTourModal({
             <span>Don&apos;t show automatically on startup</span>
           </label>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:gap-2.5">
             <button
               type="button"
               onClick={handleEnterDirectly}
-              className="rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 font-mono text-xs font-semibold text-slate-300 transition hover:border-slate-600 hover:bg-slate-800 hover:text-white"
+              className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 font-mono text-xs font-semibold text-slate-300 transition hover:border-slate-600 hover:bg-slate-800 hover:text-white sm:w-auto"
             >
               Use Site Directly
             </button>
@@ -398,9 +412,9 @@ export default function InteractiveTourModal({
               type="button"
               autoFocus
               onClick={handleStartGuidedTour}
-              className="flex items-center gap-2 rounded-xl border border-cyan-400/60 bg-cyan-500/25 px-4 py-2 font-mono text-xs font-bold text-cyan-100 shadow-[0_0_20px_rgba(34,211,238,0.3)] transition hover:bg-cyan-500/35"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-400/60 bg-cyan-500/25 px-4 py-2 font-mono text-xs font-bold text-cyan-100 shadow-[0_0_20px_rgba(34,211,238,0.3)] transition hover:bg-cyan-500/35 sm:w-auto"
             >
-              <Sparkles className="h-3.5 w-3.5 text-cyan-300" />
+              <Sparkles className="h-3.5 w-3.5 text-cyan-300" aria-hidden="true" />
               <span>Start Interactive Tour (6 Steps)</span>
             </button>
           </div>
@@ -409,10 +423,10 @@ export default function InteractiveTourModal({
 
       {/* Non-Blocking Interactive Guided Tour HUD Card when Tour is Active */}
       {tourActive && activeStep && (
-        <div className="pointer-events-none fixed inset-0 z-50 flex flex-col justify-between p-4">
+        <div className="pointer-events-none fixed inset-0 z-50 flex flex-col justify-between p-2.5 sm:p-4">
           {/* Directional Region Highlight Ring Indicator */}
-          <div className="flex justify-center pt-12">
-            <div className="pointer-events-auto w-full max-w-xl rounded-2xl border border-cyan-400/60 bg-[#040914]/95 p-4 text-slate-100 shadow-[0_0_45px_rgba(34,211,238,0.28)] backdrop-blur-xl">
+          <div className="flex justify-center pt-11 sm:pt-12">
+            <div className="pointer-events-auto max-h-[75dvh] w-full max-w-xl overflow-y-auto rounded-2xl border border-cyan-400/60 bg-[#040914]/95 p-3 text-slate-100 shadow-[0_0_45px_rgba(34,211,238,0.28)] backdrop-blur-xl sm:p-4">
               {/* Top Step Progress Header */}
               <div className="flex items-center justify-between gap-2 border-b border-slate-800/90 pb-2.5">
                 <div className="flex items-center gap-2">
@@ -523,3 +537,4 @@ export default function InteractiveTourModal({
     </>
   );
 }
+

@@ -143,13 +143,15 @@ export const useResonanceStore = create<ResonanceStoreState>((set) => ({
       if (!locationId) {
         return { selectedStationId: null, inspectingQBurst: false };
       }
+      const isMobile =
+        typeof window !== "undefined" && window.innerWidth < 1024;
       const station = STATIONS.find((s) => s.location_id === locationId);
       const nextCamera =
         flyTo && station
           ? {
               lat: station.latitude,
               lng: station.longitude,
-              altitude: 1.75,
+              altitude: isMobile ? 2.15 : 1.75,
               ts: Date.now(),
             }
           : state.cameraTarget;
@@ -157,28 +159,48 @@ export const useResonanceStore = create<ResonanceStoreState>((set) => ({
       return {
         selectedStationId: locationId,
         inspectingQBurst: false,
-        isRightSidebarOpen: true,
+        isRightSidebarOpen: isMobile ? state.isRightSidebarOpen : true,
+        isLeftSidebarOpen: isMobile ? false : state.isLeftSidebarOpen,
         cameraTarget: nextCamera,
       };
     }),
 
   selectQBurstEpicenter: (lat, lng, flyTo = true) =>
-    set((state) => ({
-      inspectingQBurst: true,
-      isRightSidebarOpen: true,
-      cameraTarget: flyTo
-        ? {
-            lat,
-            lng,
-            altitude: 1.65,
-            ts: Date.now(),
-          }
-        : state.cameraTarget,
-    })),
+    set((state) => {
+      const isMobile =
+        typeof window !== "undefined" && window.innerWidth < 1024;
+      return {
+        inspectingQBurst: true,
+        isRightSidebarOpen: isMobile ? state.isRightSidebarOpen : true,
+        isLeftSidebarOpen: isMobile ? false : state.isLeftSidebarOpen,
+        cameraTarget: flyTo
+          ? {
+              lat,
+              lng,
+              altitude: isMobile ? 2.05 : 1.65,
+              ts: Date.now(),
+            }
+          : state.cameraTarget,
+      };
+    }),
 
   setInspectingQBurst: (inspecting) => set({ inspectingQBurst: inspecting }),
-  setLeftSidebarOpen: (open) => set({ isLeftSidebarOpen: open }),
-  setRightSidebarOpen: (open) => set({ isRightSidebarOpen: open }),
+  setLeftSidebarOpen: (open) =>
+    set((state) => ({
+      isLeftSidebarOpen: open,
+      isRightSidebarOpen:
+        open && typeof window !== "undefined" && window.innerWidth < 1024
+          ? false
+          : state.isRightSidebarOpen,
+    })),
+  setRightSidebarOpen: (open) =>
+    set((state) => ({
+      isRightSidebarOpen: open,
+      isLeftSidebarOpen:
+        open && typeof window !== "undefined" && window.innerWidth < 1024
+          ? false
+          : state.isLeftSidebarOpen,
+    })),
   setActiveMetric: (metric) => set({ activeMetric: metric }),
   setSelectedHarmonic: (mode) => set({ selectedHarmonic: mode }),
   setPolarizationMode: (mode) => set({ polarizationMode: mode }),
@@ -191,14 +213,17 @@ export const useResonanceStore = create<ResonanceStoreState>((set) => ({
       },
     })),
 
-  resetGlobeView: () =>
+  resetGlobeView: () => {
+    const isNarrowMobile =
+      typeof window !== "undefined" && window.innerWidth < 640;
     set({
       inspectingQBurst: false,
       cameraTarget: {
         lat: 20,
         lng: 15,
-        altitude: 2.25,
+        altitude: isNarrowMobile ? 2.65 : 2.25,
         ts: Date.now(),
       },
-    }),
+    });
+  },
 }));

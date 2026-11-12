@@ -26,6 +26,46 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+/* Typographic orphan prevention per modern-web-guidance `form-factor-adaptation` */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p,
+li {
+  text-wrap: pretty;
+}
+
+/* Safe-area padding utilities for edge-to-edge notched mobile viewports */
+.safe-top {
+  padding-top: max(0px, env(safe-area-inset-top, 0px));
+}
+
+.safe-bottom {
+  padding-bottom: max(0.35rem, env(safe-area-inset-bottom, 0px));
+}
+
+/* Hide scrollbars on horizontal touch pill carousels while keeping scrollability */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Enlarge range slider thumb on touch devices (pointer: coarse) per `form-factor-adaptation` */
+@media (pointer: coarse) {
+  input[type="range"].resonance-range-slider {
+    --slider-track-size: 0.55rem;
+    --slider-thumb-size: 1.45rem;
+    block-size: 2.5rem;
+  }
 }
 
 /* Native Range Slider styled per modern-web-guidance `slider` specification */
