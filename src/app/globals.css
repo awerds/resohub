@@ -123,3 +123,16 @@ input[type="range"].resonance-range-slider:focus-visible {
   outline: 2px solid var(--slider-fill-color);
   outline-offset: 4px;
 }
+
+/* Native <dialog> modal scroll containment & backdrop per modern-web-guidance `dialog` */
+dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background-color: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(6px);
+}
+

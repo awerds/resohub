@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Activity,
+  BookOpen,
   Database,
   Globe2,
   Info,
@@ -14,6 +15,7 @@ import {
   RefreshCw,
   Waves,
 } from "lucide-react";
+import InteractiveTourModal from "@/components/InteractiveTourModal";
 import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar from "@/components/RightSidebar";
 import SchumannGlobe from "@/components/SchumannGlobe";
@@ -35,6 +37,7 @@ export default function ResonanceDashboardPage() {
   const setRightSidebarOpen = useResonanceStore((s) => s.setRightSidebarOpen);
 
   const [showProvenanceModal, setShowProvenanceModal] = useState(false);
+  const [tourTriggerCount, setTourTriggerCount] = useState(0);
 
   useEffect(() => {
     syncLiveClock();
@@ -119,8 +122,18 @@ export default function ResonanceDashboardPage() {
           </div>
         </div>
 
-        {/* Right Controls: Data Provenance Badge + Right Inspector Toggle */}
+        {/* Right Controls: Guided Tour Button + Data Provenance Badge + Right Inspector Toggle */}
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setTourTriggerCount((c) => c + 1)}
+            title="Open Welcome Mission Briefing & Interactive Guided Tour"
+            className="flex items-center gap-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/15 px-2.5 py-1.5 font-mono text-[11px] font-bold text-cyan-200 transition hover:bg-cyan-500/25"
+          >
+            <BookOpen className="h-3.5 w-3.5 text-cyan-300" />
+            <span className="hidden sm:inline">TOUR / GUIDE</span>
+          </button>
+
           <div className="relative">
             <button
               type="button"
@@ -237,6 +250,9 @@ export default function ResonanceDashboardPage() {
 
       {/* Persistent Bottom Temporal Navigation Bar */}
       <TimelineBottomPanel />
+
+      {/* Startup Welcome Popup & 6-Step Interactive Guided Tour */}
+      <InteractiveTourModal externalTriggerCount={tourTriggerCount} />
     </div>
   );
 }
