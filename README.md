@@ -86,7 +86,7 @@ On phones and compact viewports (`< 1024px`), **RESO // EARTH-ELF** automaticall
 ---
 
 ### ⏱️ Bottom Bar: 72-Hour Timeline Scrubber & Scenario Presets
-* **4x Default Time-Lapse Playback:** Launches animated at `4x` speed by default so you can immediately watch the 3 equatorial thunderstorm chimneys sweep around the globe over a 72-hour window.
+* **2x Default Time-Lapse Playback & Active Orbital Rotation:** Launches animated at `2x` speed with 3D globe orbital rotation active by default so you can immediately watch the 3 equatorial thunderstorm chimneys sweep around the globe over a 72-hour window.
 * **Scenario Benchmark Presets:**
   * **`Baseline Quiet (NOMINAL)`:** Undisturbed reference state ($Kp = 1.2$, $h_D \approx 80.1\text{ km}$, 0 Q-bursts).
   * **`Solar Q-Surge α (Q-BURST)`:** Moderate geomagnetic activation ($Kp = 5.0$, $h_D \approx 66.3\text{ km}$) with active Q-burst transients.
